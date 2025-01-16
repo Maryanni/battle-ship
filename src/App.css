@@ -172,17 +172,28 @@ img {
 }
 
 .cell-disabled {
-  background-color: #f8f9fa; 
+  /* background-color: #f0f0f0; */
   cursor: not-allowed; 
+  pointer-events: none;
 }
 
 .cell-enabled {
-  background-color: #fff; 
   cursor: pointer;
+  border: 1px solid #9e3838 !important;
 }
 
 .cell-enabled:hover {
-  background-color: #d4edda; 
+  background-color: #c8eed1 !important; 
+}
+
+.cell-selected-matrix {
+  background-color: #add8e6 !important;
+  transition: background-color 0.3s ease; 
+}
+
+.table-cell {
+  text-align: center !important;
+  border: 1px solid #9d9191 !important;
 }
 
 .table.disabled {

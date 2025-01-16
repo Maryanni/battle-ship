@@ -120,7 +120,11 @@ function Footer({ handleStartGame }) {
           </div>
           <div className="col-6 d-grid gap-3">
             <div>
-              <button type="button" className="btn btn-success w-100" onClick={handleStartGame}>
+              <button
+                type="button"
+                className="btn btn-success w-100"
+                onClick={handleStartGame}
+              >
                 Iniciar
               </button>
             </div>
