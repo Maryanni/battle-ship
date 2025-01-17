@@ -29,23 +29,44 @@ function Table({ startGame, selectAble }) {
   const handleCell = (row, col) => {
     if (startGame && selectAble) {
       const cellKey = `${row}-${col}`;
-      console.log(`Celda clicada: ${letters[row]}${col + 1}`);
-      setSelectCells((prev) =>
-        prev.includes(cellKey)
-          ? prev.filter((cell) => cell !== cellKey)
-          : [...prev, cellKey]
-      );
+      setSelectCells((prev) => {
+        if (prev.includes(cellKey)) {
+          return prev.filter((cell) => cell !== cellKey);
+        } else {
+          const newCells = [...prev, cellKey];
+          if (newCells.length > 19) {
+            console.log("No puedes seleccionar más de 19 celdas en total.");
+            return prev;
+          }
+          const sequences = verifySequence(newCells);
+
+          const maxSequenceLength = Math.max(
+            ...Object.entries(sequences).map(([key, count]) => {
+              const length =
+                key === "two"
+                  ? 2
+                  : key === "three"
+                  ? 3
+                  : key === "four"
+                  ? 4
+                  : 5;
+              return length * count;
+            })
+          );
+
+          return newCells;
+        }
+      });
     }
   };
 
- 
-
   const verifySequence = (cells) => {
-    const sortedCells = cells.map((cell) => {
-      const [row, col] = cell.split("-");
-      return { x: parseInt(row), y: parseInt(col) };
-    })
-    .sort((a, b) => a.x - b.x || a.y - b.y);
+    const sortedCells = cells
+      .map((cell) => {
+        const [row, col] = cell.split("-");
+        return { x: parseInt(row), y: parseInt(col) };
+      })
+      .sort((a, b) => a.x - b.x || a.y - b.y);
     return findSequences(sortedCells);
   };
 
@@ -57,7 +78,7 @@ function Table({ startGame, selectAble }) {
       const prev = sortedCells[i - 1];
       const curr = sortedCells[i];
 
-      if(
+      if (
         (prev.x === curr.x && prev.y + 1 === curr.y) ||
         (prev.y === curr.y && prev.x + 1 === curr.x)
       ) {
@@ -73,7 +94,15 @@ function Table({ startGame, selectAble }) {
     sequences.forEach((seq) => {
       const length = seq.length;
       if (length >= 2 && length <= 5) {
-        counts[length === 2 ? "two" : length === 3 ? "three" : length === 4 ? "four" : "five"]++;
+        counts[
+          length === 2
+            ? "two"
+            : length === 3
+            ? "three"
+            : length === 4
+            ? "four"
+            : "five"
+        ]++;
       }
     });
     return counts;
@@ -81,10 +110,10 @@ function Table({ startGame, selectAble }) {
 
   useEffect(() => {
     if (selectCells.length > 0) {
-        const newSequences = verifySequence(selectCells);
-        console.log("Secuencias calculadas:", newSequences);
-        setSequences(newSequences); 
-      }
+      const newSequences = verifySequence(selectCells);
+      console.log("Secuencias calculadas:", newSequences);
+      setSequences(newSequences);
+    }
   }, [selectCells]);
 
   return (
