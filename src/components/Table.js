@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../App.css";
+import { FaWater } from "react-icons/fa";
+import { GiGooeyImpact } from "react-icons/gi";
 
 function Table({ id, startGame, selectAble }) {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
   const [selectCells, setSelectCells] = useState([]);
   const [highlightedCells, setHighlightedCells] = useState([]);
+  const [clickedCells, setClickedCells] = useState(new Set());
 
   const myTable = () => {
     let myTable = [];
@@ -20,23 +23,30 @@ function Table({ id, startGame, selectAble }) {
 
   const tableData = myTable();
 
+  //Hacer click sobre la celda que selecciono
   const handleCell = (row, col) => {
-    if (startGame && selectAble) {
-      const cellKey = `${row}-${col}`;
-      setSelectCells((prev) => {
-        if (prev.includes(cellKey)) {
-          return prev.filter((cell) => cell !== cellKey);
-        } else {
-          const newCells = [...prev, cellKey];
-          if (newCells.length > 19) {
-            return prev;
+    const cellKey = `${row}-${col}`;
+    if (startGame) {
+      if (id === 2) {
+        setClickedCells((prev) => {
+          const newClick = new Set(prev);
+          newClick.add(cellKey);
+          return newClick;
+        });
+      } else if (selectAble) {
+        setSelectCells((prev) => {
+          if (prev.includes(cellKey)) {
+            return prev.filter((cell) => cell !== cellKey);
+          } else {
+            const newCells = [...prev, cellKey];
+            return newCells;
           }
-          return newCells;
-        }
-      });
+        });
+      }
     }
   };
 
+  //Genero la combinación aleatorea
   const generateCombinations = () => {
     const allCells = tableData.flatMap((row, rowIndex) =>
       row.map((_, colIndex) => `${rowIndex}-${colIndex}`)
@@ -88,12 +98,23 @@ function Table({ id, startGame, selectAble }) {
   };
 
   useEffect(() => {
-    if (startGame && id === 1) {
+    if (startGame) {
       const cellsToHighlight = generateCombinations();
       setHighlightedCells(cellsToHighlight);
     }
   }, [startGame, id]);
 
+  //Asigno el icono al hacer click
+  const sendIcon = (cellKey, isHighlighted) => {
+    if (id === 2 && clickedCells.has(cellKey)) {
+      return isHighlighted ? (
+        <GiGooeyImpact className="icon-size" />
+      ) : (
+        <FaWater className="icon-size" />
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="d-flex justify-content-center">
@@ -115,30 +136,21 @@ function Table({ id, startGame, selectAble }) {
 
               {item.map((_, cellIndex) => {
                 const cellKey = `${indexRow}-${cellIndex}`;
-                //const isSelected = selectCells.includes(cellKey);
                 const isHighlighted = highlightedCells.includes(cellKey);
-                console.log("cellKey", isHighlighted);
-
-                console.log("isHighlighted", isHighlighted);
-                //console.log("isSelected", isSelected);
-                //este va en el claseName del return
-                //${isSelected ? "cell-selected-matrix" : ""}
-
-                console.log({
-                    cellKey,
-                    highlightedCells: highlightedCells,
-                    isInArray: highlightedCells.includes(cellKey),
-                    resultingClassName: `table-cell ${startGame ? "cell-enabled" : "cell-disabled"} ${isHighlighted ? "cell-highlighted" : ""}`
-                });
+                const isSelected = selectCells.includes(cellKey);
 
                 return (
                   <td
                     key={cellIndex}
                     className={`table-cell 
                         ${startGame ? "cell-enabled" : "cell-disabled"}
-                        ${isHighlighted ? "cell-highlighted" : ""}`}
+                        ${isSelected ? "cell-selected-matrix" : ""}
+                        ${isHighlighted ? `cell-highlighted-${id}` : ""}
+                        ${clickedCells.has(cellKey) ? "clicked-cell" : ""}`}
                     onClick={() => handleCell(indexRow, cellIndex)}
-                  />
+                  >
+                    {sendIcon(cellKey, isHighlighted)}
+                  </td>
                 );
               })}
             </tr>

@@ -206,14 +206,19 @@ img {
   opacity: 1;
 }
 
-table td.cell-highlighted {
-  background-color: rgb(205, 172, 213);
-}
-
 .enabled {
   pointer-events: auto;
 }
 
 .disabled {
   pointer-events: none;
+}
+
+
+table td.cell-highlighted-1 {
+  background-color: rgb(205, 172, 213);
+}
+
+table td.cell-highlighted-2 {
+  background-color: rgb(220, 230, 128);
 }
