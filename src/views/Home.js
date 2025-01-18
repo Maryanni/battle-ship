@@ -10,7 +10,7 @@ function Home() {
     { id: 2, title: "Flota enemiga" },
   ];
   const [startGame, setStartGame] = useState("");
-  const [selectTable, setSelectTable] = useState(1);
+  const [selectTable, setSelectTable] = useState(2);
 
   const handleStartGame = () => {
     setStartGame(true);

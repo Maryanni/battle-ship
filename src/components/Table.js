@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../App.css";
 
-function Table({ startGame, selectAble }) {
+function Table({ id, startGame, selectAble }) {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  const [selectCells, setSelectCells] = useState([]);
+  const [highlightedCells, setHighlightedCells] = useState([]);
 
   const myTable = () => {
     let myTable = [];
@@ -18,14 +20,6 @@ function Table({ startGame, selectAble }) {
 
   const tableData = myTable();
 
-  const [selectCells, setSelectCells] = useState([]);
-  const [sequences, setSequences] = useState({
-    two: 0,
-    three: 0,
-    four: 0,
-    five: 0,
-  });
-
   const handleCell = (row, col) => {
     if (startGame && selectAble) {
       const cellKey = `${row}-${col}`;
@@ -35,86 +29,71 @@ function Table({ startGame, selectAble }) {
         } else {
           const newCells = [...prev, cellKey];
           if (newCells.length > 19) {
-            console.log("No puedes seleccionar más de 19 celdas en total.");
             return prev;
           }
-          const sequences = verifySequence(newCells);
-
-          const maxSequenceLength = Math.max(
-            ...Object.entries(sequences).map(([key, count]) => {
-              const length =
-                key === "two"
-                  ? 2
-                  : key === "three"
-                  ? 3
-                  : key === "four"
-                  ? 4
-                  : 5;
-              return length * count;
-            })
-          );
-
           return newCells;
         }
       });
     }
   };
 
-  const verifySequence = (cells) => {
-    const sortedCells = cells
-      .map((cell) => {
-        const [row, col] = cell.split("-");
-        return { x: parseInt(row), y: parseInt(col) };
-      })
-      .sort((a, b) => a.x - b.x || a.y - b.y);
-    return findSequences(sortedCells);
-  };
+  const generateCombinations = () => {
+    const allCells = tableData.flatMap((row, rowIndex) =>
+      row.map((_, colIndex) => `${rowIndex}-${colIndex}`)
+    );
+    const selectedCells = new Set();
+    const combinations = [
+      { count: 2, times: 2 },
+      { count: 3, times: 2 },
+      { count: 4, times: 1 },
+      { count: 5, times: 1 },
+    ];
 
-  const findSequences = (sortedCells) => {
-    const sequences = [];
-    let currentSequence = [sortedCells[0]];
+    const getRandomDirection = () =>
+      Math.random() > 0.5 ? "horizontal" : "vertical";
 
-    for (let i = 1; i < sortedCells.length; i++) {
-      const prev = sortedCells[i - 1];
-      const curr = sortedCells[i];
+    const isValidCombination = (cells) =>
+      cells.every(
+        (cell) => allCells.includes(cell) && !selectedCells.has(cell)
+      );
 
-      if (
-        (prev.x === curr.x && prev.y + 1 === curr.y) ||
-        (prev.y === curr.y && prev.x + 1 === curr.x)
-      ) {
-        currentSequence.push(curr);
-      } else {
-        sequences.push(currentSequence);
-        currentSequence = [curr];
-      }
-    }
-    sequences.push(currentSequence);
+    combinations.forEach(({ count, times }) => {
+      for (let i = 0; i < times; i++) {
+        let valid = false;
 
-    const counts = { two: 0, three: 0, four: 0, five: 0 };
-    sequences.forEach((seq) => {
-      const length = seq.length;
-      if (length >= 2 && length <= 5) {
-        counts[
-          length === 2
-            ? "two"
-            : length === 3
-            ? "three"
-            : length === 4
-            ? "four"
-            : "five"
-        ]++;
+        while (!valid) {
+          const start = Math.floor(Math.random() * allCells.length);
+          const direction = getRandomDirection();
+          const row = Math.floor(start / 10);
+          const col = start % 10;
+
+          const cells = [];
+          for (let j = 0; j < count; j++) {
+            if (direction === "horizontal") {
+              cells.push(`${row}-${col + j}`);
+            } else {
+              cells.push(`${row + j}-${col}`);
+            }
+          }
+
+          if (isValidCombination(cells)) {
+            cells.forEach((cell) => selectedCells.add(cell));
+            valid = true;
+          }
+        }
       }
     });
-    return counts;
+
+    return Array.from(selectedCells);
   };
 
   useEffect(() => {
-    if (selectCells.length > 0) {
-      const newSequences = verifySequence(selectCells);
-      console.log("Secuencias calculadas:", newSequences);
-      setSequences(newSequences);
+    if (startGame && id === 1) {
+      const cellsToHighlight = generateCombinations();
+      setHighlightedCells(cellsToHighlight);
     }
-  }, [selectCells]);
+  }, [startGame, id]);
+
 
   return (
     <div className="d-flex justify-content-center">
@@ -136,13 +115,28 @@ function Table({ startGame, selectAble }) {
 
               {item.map((_, cellIndex) => {
                 const cellKey = `${indexRow}-${cellIndex}`;
-                const isSelected = selectCells.includes(cellKey);
+                //const isSelected = selectCells.includes(cellKey);
+                const isHighlighted = highlightedCells.includes(cellKey);
+                console.log("cellKey", isHighlighted);
+
+                console.log("isHighlighted", isHighlighted);
+                //console.log("isSelected", isSelected);
+                //este va en el claseName del return
+                //${isSelected ? "cell-selected-matrix" : ""}
+
+                console.log({
+                    cellKey,
+                    highlightedCells: highlightedCells,
+                    isInArray: highlightedCells.includes(cellKey),
+                    resultingClassName: `table-cell ${startGame ? "cell-enabled" : "cell-disabled"} ${isHighlighted ? "cell-highlighted" : ""}`
+                });
+
                 return (
                   <td
                     key={cellIndex}
-                    className={`table-cell ${
-                      startGame ? "cell-enabled" : "cell-disabled"
-                    } ${isSelected ? "cell-selected-matrix" : ""}`}
+                    className={`table-cell 
+                        ${startGame ? "cell-enabled" : "cell-disabled"}
+                        ${isHighlighted ? "cell-highlighted" : ""}`}
                     onClick={() => handleCell(indexRow, cellIndex)}
                   />
                 );
