@@ -10,7 +10,6 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
   const [clickedCells, setClickedCells] = useState(new Set()); //para click en celdas tabla 2
   const [clickedCellsCPU, setClickedCellsCPU] = stateClickedCPU; //para ver celda seleccionada tabla 1
 
-
   useEffect(() => {
     if (startGame) {
       const cellsToHighlight = generateCombinations();
@@ -18,7 +17,6 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
     }
   }, [startGame, id]);
 
- 
   const myTable = () => {
     let myTable = [];
     for (let x = 0; x < 10; x++) {
@@ -60,6 +58,7 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
           return newCPUCells;
         });
       }
+      verifyResult();
     } else if (selectAble) {
       setSelectCells((prev) => {
         if (prev.includes(cellKey)) {
@@ -140,8 +139,7 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
       );
     }
     return null;
-};
-
+  };
 
   const randomSelectCPU = () => {
     const availableCell = [];
@@ -162,6 +160,24 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
     );
     const selectedCell = availableCell[randomValueToSelect];
     return selectedCell;
+  };
+
+  const verifyResult = () => {
+    if (id === 2) {
+      const cellPlayer = Array.from(clickedCells); 
+      const cellHitPlayer = cellPlayer.filter(cellKey => highlightedCells.includes(cellKey)).length;
+     
+      const cellCPU = Array.from(clickedCellsCPU); 
+      const cellHitCPU = cellCPU.filter(cellKey => highlightedCells.includes(cellKey)).length;
+   
+      if (cellHitPlayer === highlightedCells.length) {
+        if (cellHitCPU < highlightedCells.length) {
+          alert("🎉¡Felicitaciones! Ganasteeeeee 🎉");
+        }
+      } else if (cellHitCPU === highlightedCells.length) {
+        alert("¡Perdiste 😢! Puedes volver a intentar");
+      }
+    }
   };
 
   return (
@@ -186,7 +202,10 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
                 const cellKey = `${indexRow}-${cellIndex}`;
                 const isHighlighted = highlightedCells.includes(cellKey);
                 const isSelected = selectCells.includes(cellKey);
-                const isClicked = id === 1 ? clickedCellsCPU.has(cellKey) : clickedCells.has(cellKey);
+                const isClicked =
+                  id === 1
+                    ? clickedCellsCPU.has(cellKey)
+                    : clickedCells.has(cellKey);
 
                 return (
                   <td
