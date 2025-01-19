@@ -1,13 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
 import { FaWater } from "react-icons/fa";
 import { GiGooeyImpact } from "react-icons/gi";
 
 function Table({ id, startGame, selectAble }) {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-  const [selectCells, setSelectCells] = useState([]);
-  const [highlightedCells, setHighlightedCells] = useState([]);
-  const [clickedCells, setClickedCells] = useState(new Set());
+  const [selectCells, setSelectCells] = useState([]); //selección de celdas
+  const [highlightedCells, setHighlightedCells] = useState([]); //pintar celdas aleatoreas
+  const [clickedCells, setClickedCells] = useState(new Set()); //para click en celdas tabla 2
+  const [clickedCellsCPU, setClickedCellsCPU] = useState(new Set()); //para ver celda seleccionada tabla 1
+
+  const [renderedCells, setRenderedCells] = useState(new Set());
+
+  useEffect(() => {
+    if (id === 1) {
+      // Cuando clickedCellsCPU cambia, actualizar el conjunto de celdas renderizadas
+      setRenderedCells(new Set(clickedCellsCPU));
+      console.log("clickedCellsCPU actualizado:", Array.from(clickedCellsCPU));
+    }
+  }, [clickedCellsCPU, id]);
 
   const myTable = () => {
     let myTable = [];
@@ -23,26 +34,40 @@ function Table({ id, startGame, selectAble }) {
 
   const tableData = myTable();
 
-  //Hacer click sobre la celda que selecciono
-  const handleCell = (row, col) => {
+  const handleCell = async (row, col) => {
     const cellKey = `${row}-${col}`;
-    if (startGame) {
-      if (id === 2) {
-        setClickedCells((prev) => {
-          const newClick = new Set(prev);
-          newClick.add(cellKey);
-          return newClick;
-        });
-      } else if (selectAble) {
-        setSelectCells((prev) => {
-          if (prev.includes(cellKey)) {
-            return prev.filter((cell) => cell !== cellKey);
-          } else {
-            const newCells = [...prev, cellKey];
-            return newCells;
-          }
+    if (!startGame) return null;
+
+    if (id === 2) {
+      if (clickedCells.has(cellKey)) return;
+
+      setClickedCells((prevCells) => {
+        const newCells = new Set(prevCells);
+        newCells.add(cellKey);
+        return newCells;
+      });
+
+      const randomCell = randomSelectCPU();
+      if (randomCell) {
+        setClickedCellsCPU((prevCPUCells) => {
+          const newCPUCells = new Set(prevCPUCells);
+          newCPUCells.add(randomCell);
+          console.log(
+            "[Tabla 2] Actualizando clickedCellsCPU:",
+            Array.from(newCPUCells)
+          );
+          setRenderedCells(new Set(newCPUCells));
+
+          return newCPUCells;
         });
       }
+    } else if (selectAble) {
+      setSelectCells((prev) => {
+        if (prev.includes(cellKey)) {
+          return prev.filter((cell) => cell !== cellKey);
+        }
+        return [...prev, cellKey];
+      });
     }
   };
 
@@ -106,14 +131,57 @@ function Table({ id, startGame, selectAble }) {
 
   //Asigno el icono al hacer click
   const sendIcon = (cellKey, isHighlighted) => {
-    if (id === 2 && clickedCells.has(cellKey)) {
+    const isClicked = isCellClicked(cellKey);
+    if (isClicked) {
+      console.log(`[Table ${id}] Renderizando icono para:`, {
+        cellKey,
+        isHighlighted,
+      });
       return isHighlighted ? (
-        <GiGooeyImpact className="icon-size" />
+        <GiGooeyImpact key={`icon-${cellKey}`} className="icon-size" />
       ) : (
-        <FaWater className="icon-size" />
+        <FaWater key={`icon-${cellKey}`} className="icon-size" />
       );
     }
     return null;
+  };
+
+  const isCellClicked = (cellKey) => {
+    console.log(`[Table ${id}] Verificando celda:`, {
+      cellKey,
+      isTable1: id === 1,
+      clickedCellsCPUSize: clickedCellsCPU.size,
+      clickedCellsCPUContent: Array.from(clickedCellsCPU),
+    });
+
+    if (id === 1) {
+      console.log("entro en el 1 siiiiiii");
+      return renderedCells.has(cellKey);
+    }
+    return clickedCells.has(cellKey);
+  };
+
+  const randomSelectCPU = () => {
+    const availableCell = [];
+
+    for (let row = 0; row < 10; row++) {
+      for (let col = 0; col < 10; col++) {
+        const cellKey = `${row}-${col}`;
+
+        if (!clickedCellsCPU.has(cellKey)) {
+          availableCell.push(cellKey);
+        }
+      }
+    }
+    if (availableCell.length === 0) return null;
+
+    const randomValueToSelect = Math.floor(
+      Math.random() * availableCell.length
+    );
+    const selectedCell = availableCell[randomValueToSelect];
+    console.log("Celda CPU seleccionada:", selectedCell);
+
+    return selectedCell;
   };
 
   return (
@@ -131,22 +199,29 @@ function Table({ id, startGame, selectAble }) {
         </thead>
         <tbody>
           {tableData.map((item, indexRow) => (
-            <tr key={indexRow}>
+            <tr key={`row-${indexRow}`}>
               <td className="table-cell">{letters[indexRow]}</td>
 
               {item.map((_, cellIndex) => {
                 const cellKey = `${indexRow}-${cellIndex}`;
                 const isHighlighted = highlightedCells.includes(cellKey);
                 const isSelected = selectCells.includes(cellKey);
+                const isClicked = isCellClicked(cellKey);
 
                 return (
                   <td
-                    key={cellIndex}
+                    key={`cell-${cellKey}`}
                     className={`table-cell 
                         ${startGame ? "cell-enabled" : "cell-disabled"}
                         ${isSelected ? "cell-selected-matrix" : ""}
                         ${isHighlighted ? `cell-highlighted-${id}` : ""}
-                        ${clickedCells.has(cellKey) ? "clicked-cell" : ""}`}
+                        ${
+                          isClicked
+                            ? id === 1
+                              ? "clicked-cell2"
+                              : "clicked-cell"
+                            : ""
+                        }`}
                     onClick={() => handleCell(indexRow, cellIndex)}
                   >
                     {sendIcon(cellKey, isHighlighted)}

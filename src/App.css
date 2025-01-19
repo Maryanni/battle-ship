@@ -222,3 +222,7 @@ table td.cell-highlighted-1 {
 table td.cell-highlighted-2 {
   background-color: rgb(220, 230, 128);
 }
+
+.clicked-cell2{
+  background-color: #61dafb !important;
+}
