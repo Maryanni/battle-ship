@@ -4,6 +4,7 @@ import Ship from "../components/Ship";
 import Footer from "../components/Footer";
 import { useState } from "react";
 
+
 function Home() {
   const tables = [
     { id: 1, title: "Mi flota" },
@@ -11,10 +12,13 @@ function Home() {
   ];
   const [startGame, setStartGame] = useState("");
   const [selectTable, setSelectTable] = useState(2);
+  const [clickedCellsCPU, setClickedCellsCPU] = useState(new Set()); //para ver celda seleccionada tabla 1
+  
 
   const handleStartGame = () => {
     setStartGame(true);
   };
+
   return (
     <div className="container">
       <div className="card text-center">
@@ -26,7 +30,7 @@ function Home() {
                 <div key={index} className="col-6 matrix-play">
                   <span>{table.title}</span>
                   <Ship startGame={startGame} />
-                  <Table id={table.id} startGame={startGame} selectAble={table.id === selectTable}/>
+                  <Table id={table.id} startGame={startGame} selectAble={table.id === selectTable} stateClickedCPU={[clickedCellsCPU, setClickedCellsCPU]}/>
                 </div>
               ))}
           </div>
