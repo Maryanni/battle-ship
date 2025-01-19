@@ -19,6 +19,11 @@ function Home() {
     setStartGame(true);
   };
 
+  const handleClean = () => {
+    setStartGame(false);
+    setClickedCellsCPU(new Set());
+  }
+
   return (
     <div className="container">
       <div className="card text-center">
@@ -30,12 +35,16 @@ function Home() {
                 <div key={index} className="col-6 matrix-play">
                   <span>{table.title}</span>
                   <Ship startGame={startGame} />
-                  <Table id={table.id} startGame={startGame} selectAble={table.id === selectTable} stateClickedCPU={[clickedCellsCPU, setClickedCellsCPU]}/>
+                  <Table id={table.id} 
+                    startGame={startGame} 
+                    selectAble={table.id === selectTable} 
+                    stateClickedCPU={[clickedCellsCPU, setClickedCellsCPU]}
+                    cleanTable={handleClean}/>
                 </div>
               ))}
           </div>
         </div>
-        <Footer handleStartGame={handleStartGame} />
+        <Footer handleStartGame={handleStartGame} cleanTable={handleClean}/>
       </div>
     </div>
   );

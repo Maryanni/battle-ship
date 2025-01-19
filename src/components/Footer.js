@@ -1,7 +1,7 @@
 import { FaWater } from "react-icons/fa";
 import { GiGooeyImpact } from "react-icons/gi";
 
-function Footer({ handleStartGame }) {
+function Footer({ handleStartGame, cleanTable }) {
   return (
     <div className="card-footer card-group">
       <div className="card card-footer-detail card-instruction">
@@ -129,7 +129,7 @@ function Footer({ handleStartGame }) {
               </button>
             </div>
             <div>
-              <button type="button" className="btn btn-danger w-100">
+              <button type="button" className="btn btn-danger w-100" onClick={cleanTable}>
                 Finalizar juego
               </button>
             </div>

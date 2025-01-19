@@ -3,7 +3,7 @@ import "../App.css";
 import { FaWater } from "react-icons/fa";
 import { GiGooeyImpact } from "react-icons/gi";
 
-function Table({ id, startGame, selectAble, stateClickedCPU }) {
+function Table({ id, startGame, selectAble, stateClickedCPU, cleanTable }) {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
   const [selectCells, setSelectCells] = useState([]); //selección de celdas
   const [highlightedCells, setHighlightedCells] = useState([]); //pintar celdas aleatoreas
@@ -173,9 +173,11 @@ function Table({ id, startGame, selectAble, stateClickedCPU }) {
       if (cellHitPlayer === highlightedCells.length) {
         if (cellHitCPU < highlightedCells.length) {
           alert("🎉¡Felicitaciones! Ganasteeeeee 🎉");
+          cleanTable();
         }
       } else if (cellHitCPU === highlightedCells.length) {
         alert("¡Perdiste 😢! Puedes volver a intentar");
+        cleanTable();
       }
     }
   };
