@@ -1,5 +1,3 @@
-import { buque, submarino } from "../assets";
-
 function ShipCard({ image, alt, columns, startGame }) {
   return (
     <div>
